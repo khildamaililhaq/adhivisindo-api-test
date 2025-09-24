@@ -8,11 +8,112 @@
     "paths": {
         "/api/users": {
             "get": {
-                "summary": "Get list of users",
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get list of users with pagination, search and filtering",
                 "operationId": "c457726701591d1183b53aa71fc13441",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name or email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter by verification status (verified/unverified)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "verified",
+                                "unverified"
+                            ]
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    },
+                                                    "email_verified_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string"
+                                        },
+                                        "from": {
+                                            "type": "integer"
+                                        },
+                                        "last_page": {
+                                            "type": "integer"
+                                        },
+                                        "last_page_url": {
+                                            "type": "string"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "per_page": {
+                                            "type": "integer"
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "to": {
+                                            "type": "integer"
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -25,6 +126,9 @@
                 ]
             },
             "post": {
+                "tags": [
+                    "User"
+                ],
                 "summary": "Create a new user",
                 "operationId": "592819a0265360b2014512d6dbfaf0e7",
                 "requestBody": {
@@ -32,12 +136,26 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "John Doe"
                                     },
                                     "email": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "password123"
                                     }
                                 },
                                 "type": "object"
@@ -47,10 +165,56 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User created successfully"
+                        "description": "User created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "email_verified_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -62,6 +226,9 @@
         },
         "/api/users/{id}": {
             "get": {
+                "tags": [
+                    "User"
+                ],
                 "summary": "Get a specific user",
                 "operationId": "36a33ff774d5cba33c039dec2c3e0287",
                 "parameters": [
@@ -76,7 +243,38 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "email_verified_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -92,6 +290,9 @@
                 ]
             },
             "put": {
+                "tags": [
+                    "User"
+                ],
                 "summary": "Update a specific user",
                 "operationId": "b9091397c8b25f12c6adb74be6ce3a5a",
                 "parameters": [
@@ -111,10 +312,19 @@
                             "schema": {
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Updated Name"
                                     },
                                     "email": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "updated@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "newpassword123"
                                     }
                                 },
                                 "type": "object"
@@ -124,13 +334,59 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "User updated successfully"
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "email_verified_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Unauthorized"
                     },
                     "404": {
                         "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -140,6 +396,9 @@
                 ]
             },
             "delete": {
+                "tags": [
+                    "User"
+                ],
                 "summary": "Delete a specific user",
                 "operationId": "fa56cffde745d3f152f95cbacd936c0b",
                 "parameters": [
@@ -172,6 +431,9 @@
         },
         "/api/register": {
             "post": {
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Register a new user",
                 "operationId": "2f25885f3b6f61ca11724ec302d2e439",
                 "requestBody": {
@@ -249,6 +511,9 @@
         },
         "/api/login": {
             "post": {
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Login user",
                 "operationId": "0fc9610184083ac6dddab2c63139225a",
                 "requestBody": {
@@ -322,5 +587,15 @@
                 "scheme": "bearer"
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication endpoints"
+        },
+        {
+            "name": "User",
+            "description": "User management endpoints"
+        }
+    ]
 }
